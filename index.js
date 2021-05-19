@@ -1,10 +1,48 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+const port = process.env.PORT || 8000;
+
+const bodyParser = require('body-parser');
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
+
+const urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://pipe:Abcd1234@cluster0.qbooa.mongodb.net/pipedb?retryWrites=true&w=majority";
+
+
+app.use(express.static(__dirname + '/public'));
+
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
+
+app.get('/login', urlencodedParser, function (req, res) {
+  res.setHeader('Content-Type', 'text/plain')
+  res.write('welcome you posted:\n')
+  res.end(JSON.stringify(req.body, null, 2))
+
+})
+
+app.get("/views", urlencodedParser, (req, res) => {
+
+  MongoClient.connect(uri, { useUnifiedTopology: true }, (err, db) => {
+    if (err) throw err;
+    let dbo = db.db("pipedb");
+    dbo.collection("users").findOne({}, function (err, result) {
+      if (err) throw err;
+      //console.log(result);
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify(result))
+      db.close();
+    });
+  });
+})
 
 app.get("/video", (req, res) => {
   // Ensure there is a range given for the video
@@ -13,11 +51,11 @@ app.get("/video", (req, res) => {
     res.status(400).send("Requires Range header");
   }
 
-  console.log('range: ' + range.replace(/\D/g, ""))
-
   // get video stats (about 61MB)
   const videoPath = "data/bigbuck.mp4";
   const videoSize = fs.statSync(videoPath).size;
+
+  //console.log('range: ' + range.replace(/\D/g, ""));
 
   // Parse Range
   // Example: "bytes=32324-"
@@ -44,6 +82,6 @@ app.get("/video", (req, res) => {
   videoStream.pipe(res);
 });
 
-app.listen(8000, () => {
+app.listen(port, () => {
   console.log("Listening on port 8000!");
 });
