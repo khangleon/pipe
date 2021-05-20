@@ -43,8 +43,6 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + "/data.html");
 });
 
-
-
 app.post("/addname", (req, res) => {
     var myData = new User(req.body);
     myData.save()

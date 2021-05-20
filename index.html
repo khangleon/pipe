@@ -1,20 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Video Streaming</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css" />
-  </head>
 
-  <body>
-    <h2>VIDEO STREAMING...</h2>
-    <video id="videoPlayer" width="650" controls muted="muted" autoplay>
-      <source src="/video" type="video/mp4" />
-    </video>
-    <i>Big Buck Bunny</i>
-    <hr/>
-    <button id="myButton">Đồng ý</button>
-  </body>
-  <script src="js/client.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Streaming</title>
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+  <h2>VIDEO STREAMING...</h2>
+  <video id="videoPlayer" width="650" controls muted="muted" autoplay loop>
+    <source src="/video" type="video/mp4" />
+  </video>
+  <i>Big Buck Bunny</i>
+  <input type="text" id="iCommemt" placeholder="Nhập văn bản..." style="width: 480px;" />
+  <button id="myButton" style="width: 80px;">Bình luận</button> <span id="count"></span>
+  <hr />
+  <ul id="tblComments"></ul>
+  <div id="loading">
+    <span class="sr-only">Loading...</span>
+  </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="js/client.js"></script>
+
 </html>

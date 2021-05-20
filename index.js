@@ -3,46 +3,63 @@ const app = express();
 const fs = require("fs");
 const port = process.env.PORT || 8000;
 
-const bodyParser = require('body-parser');
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
-// parse application/json
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://pipe:Abcd1234@cluster0.qbooa.mongodb.net/pipedb?retryWrites=true&w=majority";
 
-
 app.use(express.static(__dirname + '/public'));
-
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-app.get('/login', urlencodedParser, function (req, res) {
-  res.setHeader('Content-Type', 'text/plain')
-  res.write('welcome you posted:\n')
-  res.end(JSON.stringify(req.body, null, 2))
+app.post('/add', (req, res) => {
 
-})
-
-app.get("/views", urlencodedParser, (req, res) => {
-
-  MongoClient.connect(uri, { useUnifiedTopology: true }, (err, db) => {
+  MongoClient.connect(uri, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true
+  }, (err, db) => {
     if (err) throw err;
+
     let dbo = db.db("pipedb");
-    dbo.collection("users").findOne({}, function (err, result) {
+
+    let entity = {
+      content: req.body.comment,
+      dateTime: req.body.dateTime
+    }
+
+    dbo.collection("Comments").insertOne(entity, (err, records) => {
       if (err) throw err;
-      //console.log(result);
-      res.setHeader("Content-Type", "application/json; charset=utf-8");
-      res.end(JSON.stringify(result))
+      console.log("1 document inserted");
+      //console.log(JSON.stringify(records.ops[0]))
+      res.json(records.ops[0]);
       db.close();
     });
+
   });
+
 })
+
+app.get('/list-comments', (req, res) => {
+  MongoClient.connect(uri, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true
+  }, (err, db) => {
+    if (err) throw err;
+
+    let dbo = db.db("pipedb");
+
+    dbo.collection("Comments").find().toArray((err, result) => {
+      if (err) return console.log(err);
+      res.send(result);
+    });
+
+  });
+
+});
 
 app.get("/video", (req, res) => {
   // Ensure there is a range given for the video
