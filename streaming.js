@@ -17,9 +17,12 @@ app.get("/videos", (req, res) => {
 
   // Parse Range
   // Example: "bytes=32324-"
-  const CHUNK_SIZE = 10 ** 6; // 1MB
+  const CHUNK_SIZE = 100 ** 6; // 10MB
   const start = Number(range.replace(/\D/g, ""));
   const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+
+  console.log('Range: '+ range.replace(/\D/g, ""));
+  console.log('End: '+ end);
 
   // Create headers
   const contentLength = end - start + 1;
