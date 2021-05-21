@@ -1,4 +1,4 @@
-function PostData(url, data, success, error) {
+function PostData(url, data, success, errors) {
   $.ajax({
     url: url,
     dataType: 'json',
@@ -10,8 +10,18 @@ function PostData(url, data, success, error) {
       success(data, textStatus, jQxhr);
     },
     error: function (jqXhr, textStatus, errorThrown) {
-      error(errorThrown);
+      errors(errorThrown);
     }
+  });
+}
+
+function GetData(url, cb, errs) {
+  fetch(url).then((res) => {
+    return res.json();
+  }).then((json) => {
+    cb(json);
+  }).catch((err) => {
+    errs(err.message);
   });
 }
 
@@ -36,7 +46,7 @@ function showComments(data) {
   }
 
   $('#tblComments').append(li);
-  $('#count').text('('+ data.length+')');
+  $('#count').text('(' + data.length + ')');
 }
 
 $('#myButton').click(() => {
@@ -52,7 +62,7 @@ $('#myButton').click(() => {
   PostData('/add', postData, (data) => {
     $('#tblComments').prepend('<li>' + data.content + '</li>');
     $('#iCommemt').val('');
-    $('#count').text('('+ $("#tblComments li").length +')');
+    $('#count').text('(' + $("#tblComments li").length + ')');
   });
 });
 
@@ -63,7 +73,19 @@ $('#iCommemt').keyup(function (e) {
 });
 
 $(() => {
-  setTimeout(()=>{
-    getapi('/list-comments');
+  setTimeout(() => {
+    GetData('/list-comments', (data) => {
+      showComments(data);
+      $('#loading').hide();
+    });
   }, 1000)
+
+  Webcam.set({
+    width: 320,
+    height: 240,
+    image_format: 'jpeg',
+    jpeg_quality: 90
+  });
+  Webcam.attach( '#divCam' );
+
 });

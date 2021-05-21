@@ -1,7 +1,14 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const users = {};
+
 const port = process.env.PORT || 8000;
+
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -24,19 +31,20 @@ app.post('/add', (req, res) => {
   }, (err, db) => {
     if (err) throw err;
 
-    let dbo = db.db("pipedb");
-
-    let entity = {
+    let doc = {
       content: req.body.comment,
       dateTime: req.body.dateTime
     }
 
-    dbo.collection("Comments").insertOne(entity, (err, records) => {
-      if (err) throw err;
-      console.log("1 document inserted");
-      //console.log(JSON.stringify(records.ops[0]))
-      res.json(records.ops[0]);
+    let dbo = db.db("pipedb");
+    dbo.collection("Comments").insertOne(doc, (err, response) => {
+      if (err) {
+        res.status(400).send({ status: 0, "errors": err });
+      }
+
+      let rows = response.ops[0];
       db.close();
+      res.json(rows);
     });
 
   });
@@ -51,7 +59,6 @@ app.get('/list-comments', (req, res) => {
     if (err) throw err;
 
     let dbo = db.db("pipedb");
-
     dbo.collection("Comments").find().toArray((err, result) => {
       if (err) return console.log(err);
       res.send(result);
@@ -99,6 +106,42 @@ app.get("/video", (req, res) => {
   videoStream.pipe(res);
 });
 
-app.listen(port, () => {
-  console.log("Listening on port 8000!");
+io.sockets.on('connection', function (socket) {
+  console.log('new 1 client connection: ' + socket.id)
+  socket.on('new user', function (name, data) {
+    if (name in users) {
+      data(false);
+    } else {
+      data(true);
+      socket.nickname = name;
+      users[socket.nickname] = socket;
+      console.log('add nickName');
+      updateNickNames();
+    }
+
+  });
+
+  function updateNickNames() {
+    io.sockets.emit('usernames', Object.keys(users));
+  }
+  socket.on('open-chatbox', function (data) {
+    users[data].emit('openbox', { nick: socket.nickname });
+  });
+  socket.on('send message', function (data, sendto) {
+    users[sendto].emit('new message', { msg: data, nick: socket.nickname, sendto: sendto });
+    users[socket.nickname].emit('new message', { msg: data, nick: socket.nickname, sendto: sendto });
+
+    console.log(data);
+  });
+  socket.on('disconnect', function (data) {
+    if (!socket.nickname) return;
+    delete users[socket.nickname];
+    updateNickNames();
+  });
 });
+
+server.listen(port, () => {
+  console.log("Listening on port " + port);
+});
+
+

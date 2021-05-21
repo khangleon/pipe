@@ -11,3 +11,20 @@ body {
   h2 {
     line-height: 1.2;
   }
+
+  .row {
+    display: flex;
+  }
+  
+  /* Create two equal columns that sits next to each other */
+  .col {
+    flex: 50%;
+  }
+
+  .left {
+    flex: 70%;
+  }
+
+  .right {
+    flex: 30%;
+  }

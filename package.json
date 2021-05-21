@@ -12,9 +12,11 @@
     "body-parser": "^1.19.0",
     "ejs": "^2.7.1",
     "express": "^4.17.1",
+    "http": "0.0.1-security",
     "mongodb": "^3.6.7",
     "mongoose": "^5.12.10",
     "nodemon": "^2.0.5",
-    "pg": "^8.6.0"
+    "pg": "^8.6.0",
+    "socket.io": "^4.1.2"
   }
 }

@@ -10,9 +10,15 @@
 
 <body>
   <h2>VIDEO STREAMING...</h2>
-  <video id="videoPlayer" width="650" controls muted="muted" autoplay loop>
-    <source src="/video" type="video/mp4" />
-  </video>
+  <div class="row">
+    <div class="left"></div>
+    <video id="videoPlayer" width="650" controls muted="muted" autoplay loop>
+      <source src="/video" type="video/mp4" />
+    </video>
+    <div class="right">
+      <div class="webcam" id="divCam"></div>
+    </div>
+  </div>
   <i>Big Buck Bunny</i>
   <input type="text" id="iCommemt" placeholder="Nhập văn bản..." style="width: 480px;" />
   <button id="myButton" style="width: 80px;">Bình luận</button> <span id="count"></span>
@@ -22,8 +28,12 @@
     <span class="sr-only">Loading...</span>
   </div>
 </body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"
-  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="js/webcam.js"></script>
+<script src="socket.io/socket.io.js"></script>
+<script src="js/socket.js"></script>
 <script src="js/client.js"></script>
+
 
 </html>

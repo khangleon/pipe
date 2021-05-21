@@ -54,7 +54,6 @@ app.post("/addname", (req, res) => {
         });
 });
 
-
 app.route('/goData')
     .get(function (req, res) {
         res.sendFile(path + '/data.html');
@@ -64,7 +63,7 @@ app.get("/views", (req, res) => {
 
 })
 
-
 app.listen(port, () => {
     console.log("Server listening on port " + port);
 });
+
