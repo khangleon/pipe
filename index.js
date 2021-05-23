@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+const config = require("./config");
+const initUserController = require("./api/controller/initUserController");
 
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
@@ -9,13 +11,21 @@ const users = {};
 const port = process.env.PORT || 8000;
 
 
+//console.log(config.getDBConnection())
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
-const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://pipe:Abcd1234@cluster0.qbooa.mongodb.net/pipedb?retryWrites=true&w=majority";
+//const MongoClient = require('mongodb').MongoClient;
+//const uri = "mongodb+srv://pipe:Abcd1234@cluster0.qbooa.mongodb.net/pipedb?retryWrites=true&w=majority";
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
+
+mongoose.connect(config.getDBConnection(), { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
+  if (err) throw err;
+  console.log('connect mongoose successfull');
+})
 
 app.use(express.static(__dirname + '/public'));
 
@@ -23,47 +33,50 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
+initUserController(app);
+
 app.post('/add', (req, res) => {
 
-  MongoClient.connect(uri, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true
-  }, (err, db) => {
+  let Comments = mongoose.model('comments', new Schema({
+    content: String,
+    dateTime: Date
+  }));
+
+  Comments.create([{
+    content: req.body.comment,
+    dateTime: req.body.dateTime
+  }], (err, comments) => {
     if (err) throw err;
-
-    let doc = {
-      content: req.body.comment,
-      dateTime: req.body.dateTime
-    }
-
-    let dbo = db.db("pipedb");
-    dbo.collection("Comments").insertOne(doc, (err, response) => {
-      if (err) {
-        res.status(400).send({ status: 0, "errors": err });
-      }
-
-      let rows = response.ops[0];
-      db.close();
-      res.json(rows);
-    });
-
-  });
+    //console.log(comments);
+    res.send(comments);
+  })
 
 })
 
 app.get('/list-comments', (req, res) => {
-  MongoClient.connect(uri, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true
-  }, (err, db) => {
+  const Comments = mongoose.model('comments', new Schema({
+    content: String,
+    dateTime: Date
+  }));
+
+  Comments.find({}, (err, comments) => {
     if (err) throw err;
+    //console.log(comments);
+    res.send(comments);
+  });
 
-    let dbo = db.db("pipedb");
-    dbo.collection("Comments").find().toArray((err, result) => {
-      if (err) return console.log(err);
-      res.send(result);
-    });
+});
 
+app.get('/search-comments', (req, res) => { 
+
+  const Comments = mongoose.model('comments', new Schema({
+    content: String,
+    dateTime: Date
+  }));
+
+  Comments.find({}, (err, comments) => {
+    if (err) throw err;
+    res.send(comments);
   });
 
 });

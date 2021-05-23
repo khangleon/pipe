@@ -60,7 +60,7 @@ $('#myButton').click(() => {
   }
 
   PostData('/add', postData, (data) => {
-    $('#tblComments').prepend('<li>' + data.content + '</li>');
+    $('#tblComments').prepend('<li>' + data[0].content + '</li>');
     $('#iCommemt').val('');
     $('#count').text('(' + $("#tblComments li").length + ')');
   });
